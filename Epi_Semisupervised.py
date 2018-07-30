@@ -15,10 +15,6 @@ from StructDefinition import *
 from Utility.DataUtility import *
 from Utility.GeometryUtility import *
 
-import os
-
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 def Image2Crop(x, para):
     scale = para[6]
@@ -56,12 +52,9 @@ def main():
     gpu_id = [0]
     nGPUs = len(gpu_id)
 
-    tfr_labeled_data_files = 'js_training_data.tfrecords'
-    # tfr_labeled_data_files = 'js_training_data_unlabeled_ransac.tfrecords'
+    tfr_labeled_data_files = 'training_data.tfrecords'
 
-    tfr_unlabeled_data_files = 'js_training_data_unlabeled_pair.tfrecords'
-    #tfr_unlabeled_data_files = 'js_training_data_unlabeled_ransac.tfrecords'
-    # tfr_file_supervised = 'js_training_data_unlabeled_supervised.tfrecords'
+    tfr_unlabeled_data_files = 'training_data_unlabeled_pair.tfrecords'
 
     input_size = 368
     heatmap_size = 46
@@ -72,16 +65,10 @@ def main():
     heatmap_extension_length = 20
     training_iterations = 10000000
 
-    pretrained_model = "/media/yaoxx340/data/yaoxx340/cpm_ep/alg2.ckpt-2023"
-    #pretrained_model = '/mnt/hspark/model/ransac_model/model_unlabeled_ransac.ckpt-0'
-    # pretrained_model = '/mnt/hspark/model/pair_model/model_unlabeled_pair.ckpt-2801'
+    pretrained_model = "alg2.ckpt-2023"
 
-    # Working for 56
-    # learning_rate = 0.000001
-    # lr_decay_rate = 0.1
-    # lr_decay_step = 500
 
-    learning_rate = 1e-5#0.0000001
+    learning_rate = 1e-5
     lr_decay_rate = 0.5
     # lr_decay_step = 1000*30
     lr_decay_step = 2000
@@ -93,8 +80,6 @@ def main():
     validation_frame = LoadValidationData(validation_file)
     print(len(validation_frame))
 
-    limb_idx = LoadLimbDefinitionData('limb_definition.txt')
-    num_of_limbs = len(limb_idx)
 
     output_path = 'vis/'
     if not os.path.exists(output_path):
