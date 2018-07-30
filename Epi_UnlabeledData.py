@@ -15,14 +15,10 @@ from Utility.DataUtility import *
 from Utility.GeometryUtility import *
 from numpy import linalg as LA
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-
-tfr_file = 'js_training_data_unlabeled_pair.tfrecords'
-tfr_file_ransac = 'js_training_data_unlabeled_ransac.tfrecords'
-# tfr_file_supervised = 'js_training_data_unlabeled_supervised.tfrecords'
-pretrained_model = "/media/yaoxx340/data/yaoxx340/cpm_ep/alg2.ckpt-2023"
-# pretrained_model = 'model_labeled.ckpt-0'
+tfr_file = 'training_data_unlabeled_pair.tfrecords'
+tfr_file_ransac = 'training_data_unlabeled_ransac.tfrecords'
+pretrained_model = "/alg2.ckpt-2023"
 dataset_dir = ''
 
 SHOW_INFO = False
@@ -48,23 +44,12 @@ def _float32_feature(value):
 
 img_count = 0
 
-vCamera = LoadCameraData('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/camera.txt') 
-vCamera = LoadCameraIntrinsicData('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/intrinsic.txt', vCamera)
-limb_idx = LoadLimbDefinitionData('limb_definition.txt')
-num_of_limbs = len(limb_idx)
-print(num_of_limbs)
+vCamera = LoadCameraData('camera.txt') 
+vCamera = LoadCameraIntrinsicData('intrinsic.txt', vCamera)
+
 
 pair_camera = GetPair(vCamera)
 
-# pair_camera1 = []
-# for i in range(0,len(pair_camera),5 ):
-#     pair_camera1.append(pair_camera[i])
-# # pair_camera1.append(pair_camera[1])
-# pair_camera = pair_camera1
-
-# for i in range(len(pair_camera)):
-#     for j in range(len(pair_camera[i])):
-#         print(pair_camera[i][j])
 
 n = 0
 for i in range(len(pair_camera)):
@@ -78,12 +63,12 @@ if not os.path.exists(val_path):
 
 
 
-gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/unlabel.txt', 'rb').readlines()
+gt_content = open('unlabel.txt', 'rb').readlines()
 vCamera_new = []
 time_instance = []
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path =  '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/undis_img/' + line[0]
+    cur_img_path =  line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -186,12 +171,12 @@ for iTime in range(len(time_instance)):
 
 SaveValidationData("validation/val_list.txt", vFrame)
 
-gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/alg2.txt', 'rb').readlines()
+gt_content = open('label.txt', 'rb').readlines()
 
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/undis_img/' + line[0]
+    cur_img_path = line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -559,168 +544,3 @@ print(img_count)
 
 tfr_writer.close()
 
-
-#
-# tfr_writer = tf.python_io.TFRecordWriter(tfr_file_supervised)
-# print(len(vCamera_new))
-# img_count = 0
-# for iTime in range(len(time_instance)):
-#     vCamera_time = []
-#     for iCamera in range(len(vCamera_new)):
-#         if vCamera_new[iCamera].time == time_instance[iTime]:
-#             vCamera_time.append(vCamera_new[iCamera])
-#
-#     for iFrame1 in range(0,len(vCamera_time), 7):
-#         iFrame = -1
-#         for j in range(len(vCamera_time)):
-#             if vCamera_time[j].frame == iFrame1:
-#                 iFrame = iFrame1
-#
-#         if (iFrame == -1):
-#             continue
-#
-#         output_image_raw = vCamera_time[iFrame].image.astype(np.uint8).tostring()
-#         output_heatmaps_raw = vCamera_time[iFrame].heatmap.flatten().tolist()
-#         output_cropping_param_raw = vCamera_time[iFrame].cropping_para
-#         output_R_raw = vCamera_time[iFrame].R.flatten().tolist()
-#         output_C_raw = vCamera_time[iFrame].C.flatten().tolist()
-#         output_K_raw = vCamera_time[iFrame].K.flatten().tolist()
-#
-#         raw_sample = tf.train.Example(features=tf.train.Features(
-#             feature={'image': _bytes_feature(output_image_raw),
-#                      'heatmaps': _float32_feature(output_heatmaps_raw),
-#                      'cropping_param': _float32_feature(output_cropping_param_raw),
-#                      'K': _float32_feature(output_K_raw),
-#                      'R': _float32_feature(output_R_raw),
-#                      'C': _float32_feature(output_C_raw),
-#                      'frame': _float32_feature([vCamera_time[iFrame].time, vCamera_time[iFrame].frame])}))
-#
-#         tfr_writer.write(raw_sample.SerializeToString())
-#         img_count += 1
-# print(img_count)
-# tfr_writer.close()
-#
-#
-
-
-
-
-
-#
-# img_count = 0
-# for iFrame in range(len(vCamera_new)):
-#     triple_idx = -1
-#     count = 0
-#     for iTriple in range(len(triple)):
-#         if (vCamera_new[iFrame].frame == triple[iTriple][0]):
-#             triple_idx = iTriple
-#
-#             idx_src1 = -1
-#             idx_src2 = -1
-#             for iFrame1 in range(len(vCamera_new)):
-#                 if (vCamera_new[iFrame1].time == vCamera_new[iFrame].time) and (vCamera_new[iFrame1].frame == triple[triple_idx][1]):
-#                     idx_src1 = iFrame1
-#                 if (vCamera_new[iFrame1].time == vCamera_new[iFrame].time) and (vCamera_new[iFrame1].frame == triple[triple_idx][2]):
-#                     idx_src2 = iFrame1
-#             if idx_src1 == -1 or idx_src2 == -1:
-#                 continue
-#
-#             camera_ref = vCamera_new[iFrame]
-#             camera_src1 = vCamera_new[idx_src1]
-#             camera_src2 = vCamera_new[idx_src2]
-#
-#             nConf = 0
-#             confident_joint = np.zeros((num_of_joints))
-#             for iJoint in range(num_of_joints):
-#                 if camera_src1.conf[iJoint] > 0.5 and camera_src2.conf[iJoint] > 0.5:
-#                     nConf += 1
-#                     confident_joint[iJoint] = 1
-#
-#             if nConf < 5:
-#                 continue
-#             #
-#             #
-#             # # print("A")
-#             #
-#             # # if camera_ref.isConf == False:
-#             # #     continue
-#             #
-#             # if camera_src1.isConf == False or camera_src2.isConf == False:
-#             #     continue
-#             # # print("b")
-#
-#             et = EpiTriple()
-#             et.SetParameter(camera_ref, camera_src1, camera_src2, float(heatmap_size)/img_size, heatmap_extension_length)
-#             et.ComputeStereoRectification()
-#
-#             output_image_ref = et.camera_ref.image.astype(np.uint8).tostring()
-#             output_image_src1 = et.camera_src1.image.astype(np.uint8).tostring()
-#             output_image_src2 = et.camera_src2.image.astype(np.uint8).tostring()
-#             output_heatmap = et.camera_ref.heatmap.flatten().tolist()
-#             output_H1 = et.H_stereo_rect1.flatten().tolist()
-#             output_H01 = et.H_stereo_rect01.flatten().tolist()
-#             output_H2 = et.H_stereo_rect2.flatten().tolist()
-#             output_H02 = et.H_stereo_rect02.flatten().tolist()
-#             output_a1 = et.a01.flatten().tolist()
-#             output_b1 = et.b01.flatten().tolist()
-#             output_a2 = et.a02.flatten().tolist()
-#             output_b2 = et.b02.flatten().tolist()
-#             output_confident_joint = confident_joint.flatten().tolist()
-#
-#             raw_sample = tf.train.Example(features=tf.train.Features(
-#                 feature={'image_ref': _bytes_feature(output_image_ref),
-#                          'image_src1': _bytes_feature(output_image_src1),
-#                          'image_src2': _bytes_feature(output_image_src2),
-#                          'heatmaps': _float32_feature(output_heatmap),
-#                          'H1': _float32_feature(output_H1),
-#                          'H01': _float32_feature(output_H01),
-#                          'H2': _float32_feature(output_H2),
-#                          'H02': _float32_feature(output_H02),
-#                          'a1': _float32_feature(output_a1),
-#                          'b1': _float32_feature(output_b1),
-#                          'a2': _float32_feature(output_a2),
-#                          'b2': _float32_feature(output_b2),
-#                          'frame': _float32_feature([et.camera_ref.time, et.camera_ref.frame]),
-#                          'confident_joint': _float32_feature(output_confident_joint)}))
-#
-#             tfr_writer.write(raw_sample.SerializeToString())
-#             count +=1
-#
-#             if count > 10:
-#                 break
-#
-#             img_count += 1
-# print(img_count)
-#
-# tfr_writer.close()
-
-#
-# tfr_writer = tf.python_io.TFRecordWriter(tfr_file_supervised)
-# print(len(vCamera_new))
-# # vET = []
-# img_count = 0
-# for iFrame in range(len(vCamera_new)):
-#
-#     if (vCamera_new[iFrame].isConf == False):
-#         continue
-#
-#     output_image_raw = vCamera_new[iFrame].image.astype(np.uint8).tostring()
-#     output_heatmaps_raw = vCamera_new[iFrame].heatmap.flatten().tolist()
-#     output_cropping_param_raw = vCamera_new[iFrame].cropping_para
-#     output_R_raw = vCamera_new[iFrame].R.flatten().tolist()
-#     output_C_raw = vCamera_new[iFrame].C.flatten().tolist()
-#     output_K_raw = vCamera_new[iFrame].K.flatten().tolist()
-#
-#     raw_sample = tf.train.Example(features=tf.train.Features(
-#         feature={'image': _bytes_feature(output_image_raw), 'heatmaps': _float32_feature(output_heatmaps_raw),
-#                  'cropping_param': _float32_feature(output_cropping_param_raw),
-#                  'K': _float32_feature(output_K_raw),
-#                  'R': _float32_feature(output_R_raw),
-#                  'C': _float32_feature(output_C_raw),
-#                  'frame': _float32_feature([np.float(line[1]), np.float(line[2])])}))
-#
-#     tfr_writer.write(raw_sample.SerializeToString())
-#     img_count += 1
-#
-# `(img_count)
-# tfr_writer.close()
