@@ -1,15 +1,11 @@
-import os
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import tensorflow as tf
 import numpy as np
 import cv2
 from utils import cpm_utils, tf_utils
 from cpm_net import *
 
-# In[2]:
 
-
-tfr_data_files = ['alg2.tfrecords','alg3_iter2.tfrecords']
+tfr_data_files = ['alg2.tfrecords']
 input_size = 368
 heatmap_size = 46
 stages =6 
@@ -24,19 +20,13 @@ color_channel ='RGB'
 
 
 
-# In[3]:
-
-
 batch_x, batch_y = tf_utils.read_batch_cpm(tfr_data_files, input_size, heatmap_size, num_of_joints, batch_size)
 
 
-# In[4]:
 
 
 input_placeholder = tf.placeholder(dtype=tf.float32, shape=(batch_size, input_size, input_size, 3),name='input_placeholer')
 
-
-# In[5]:
 
 
 cmap_placeholder = tf.placeholder(dtype=tf.float32, shape=(batch_size, input_size, input_size, 1),
@@ -45,20 +35,14 @@ hmap_placeholder = tf.placeholder(dtype=tf.float32,shape=(batch_size, heatmap_si
                                       name='hmap_placeholder')
 
 
-# In[6]:
-
 
 model = CPM_Model(stages, num_of_joints + 1)
 
-
-# In[ ]:
 
 
 model.build_model(input_placeholder, batch_size)
 model.build_loss(hmap_placeholder, lr, lr_decay_rate, lr_decay_step)
 
-
-# In[ ]:
 
 with tf.Session() as sess:
 
@@ -105,13 +89,13 @@ with tf.Session() as sess:
         print(total_loss_np)
         #mem = sess.run(tf.contrib.memory_stats.MaxBytesInUse())
         #print(mem)
-        if global_step % 2000 == 0:
-            saver.save(sess=sess, save_path="./alg3_iter2.ckpt", global_step=global_step)
+        if global_step % 1000 == 0:
+            saver.save(sess=sess, save_path="./alg2.ckpt", global_step=global_step)
             print('\nModel checkpoint saved...\n')
 
             
         if total_loss_np <= 50:
-            saver.save(sess=sess, save_path="./alg3_iter2.ckpt", global_step=global_step)
+            saver.save(sess=sess, save_path="./alg2.ckpt", global_step=global_step)
             print('\nModel checkpoint saved...\n')
             break
 
