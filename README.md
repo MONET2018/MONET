@@ -4,6 +4,6 @@ Follow the intructions in this website http://domedb.perception.cs.cmu.edu/17120
 
 Run cpm_training_data.py to generate tfrecord training data using label.txt.
 
-Run cpm_train.py train convolutional pose machine model for labeled data.
+Run cpm_train.py to train convolutional pose machine model for labeled data.
 
 
