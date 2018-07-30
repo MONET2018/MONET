@@ -9,7 +9,7 @@ import random
 import os
 
 
-tfr_file = 'alg3_iter2.tfrecords'
+tfr_file = 'alg2.tfrecords'
 dataset_dir = ''
 
 SHOW_INFO = False
@@ -36,11 +36,11 @@ tfr_writer = tf.python_io.TFRecordWriter(tfr_file)
 
 img_count = 0
 
-gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/alg3_iter2.txt', 'rb').readlines()
+gt_content = open('label.txt', 'rb').readlines()
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/undis_img/' + line[0]
+    cur_img_path = line[0]
     cur_img = cv2.imread(cur_img_path)
     if os.path.isfile(cur_img_path) == False:
         continue
@@ -150,11 +150,6 @@ for idx, line in enumerate(gt_content):
     output_background_map = np.ones((heatmap_size, heatmap_size)) - np.amax(output_heatmaps, axis=2)
     output_heatmaps = np.concatenate((output_heatmaps, output_background_map.reshape((heatmap_size, heatmap_size, 1))),axis=2)
     #print(output_heatmaps.shape)
-    '''
-    cv2.imshow('', (output_background_map*255).astype(np.uint8))
-    cv2.imshow('h', (np.amax(output_heatmaps[:, :, 0:21], axis=2)*255).astype(np.uint8))
-    cv2.waitKey(1000)
-    '''
 
 
     coords_set = np.concatenate((np.reshape(cur_hand_joints_x, (num_of_joints, 1)),np.reshape(cur_hand_joints_y, (num_of_joints, 1))), axis=1)
