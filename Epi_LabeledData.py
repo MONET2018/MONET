@@ -11,7 +11,7 @@ from Utility.Epi_class import *
 from Utility.DataUtility import *
 from Utility.GeometryUtility import *
 
-tfr_file = 'js_training_data.tfrecords'
+tfr_file = 'training_data.tfrecords'
 dataset_dir = ''
 
 SHOW_INFO = False
@@ -20,21 +20,6 @@ heatmap_size = 46
 num_of_joints = 19
 gaussian_radius = 1
 
-# num_of_limbs = 13
-limb_threshold = 2
-# limb_idx = [[1,2],
-#             [1,5],
-#             [2,3],
-#             [3,4],
-#             [5,6],
-#             [6,7],
-#             [1,8],
-#             [8,9],
-#             [9,10],
-#             [1,11],
-#             [11,12],
-#             [12,13],
-#             [1,0]]
 
 
 def _bytes_feature(value):
@@ -51,20 +36,16 @@ tfr_writer = tf.python_io.TFRecordWriter(tfr_file)
 
 img_count = 0
 
-limb_idx = LoadLimbDefinitionData('limb_definition.txt')
-num_of_limbs = len(limb_idx)
-print(num_of_limbs)
-vCamera = LoadCameraData('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/camera.txt')
-vCamera = LoadCameraIntrinsicData('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/intrinsic.txt', vCamera)
+vCamera = LoadCameraData('camera.txt')
+vCamera = LoadCameraIntrinsicData('/intrinsic.txt', vCamera)
 
-gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/alg2.txt', 'rb').readlines()
+gt_content = open('label.txt', 'rb').readlines()
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171204_pose3/undis_img/' + line[0]
+    cur_img_path = line[0]
     cur_img = cv2.imread(cur_img_path)
 
-    # # skeleton = Load3DSkeletonData("%08d/skeleton/skeleton.txt" % np.int(line[1]))
     for iCamera in range(len(vCamera)):
         if vCamera[iCamera].frame == np.int(line[2]):
             camera_ref = vCamera[iCamera]
@@ -121,26 +102,6 @@ for idx, line in enumerate(gt_content):
          ht = cv2.resize(ht, (0, 0), fx=float(heatmap_size)/img_size, fy=float(heatmap_size)/img_size, interpolation=cv2.INTER_LANCZOS4)
          output_heatmaps[:, :, i] = ht
 
-    # for i in range(num_of_limbs):
-    #     idx_from = limb_idx[i][0]
-    #     idx_to = limb_idx[i][1]
-    #     ht = cpm_utils.make_limbmap(img_size, [offset_x + cur_hand_joints_x[
-    #                                                                                 idx_from] * img_scale,
-    #                                                                              offset_y + cur_hand_joints_y[
-    #                                                                                  idx_from] * img_scale],
-    #                                                                             [offset_x + cur_hand_joints_x[
-    #                                                                                 idx_to] * img_scale,
-    #                                                                              offset_y + cur_hand_joints_y[
-    #                                                                                  idx_to] * img_scale],
-    #                                                                            limb_threshold*float(img_size)/heatmap_size)
-    #     output_limbs_heatmaps[:, :, i * 2:(i + 1) * 2] = cv2.resize(ht, (0, 0), fx=float(heatmap_size) / img_size, fy=float(heatmap_size) / img_size,
-    #                     interpolation=cv2.INTER_LANCZOS4)
-
-    # out = VisualizeLimbHeatmap(output_image, output_limbs_heatmaps, img_size)
-    # cv2.imwrite("aaa.jpg", out)
-
-        # print(np.amax(output_limbs_heatmaps[:, :, i * 2], axis=(0,1)))
-        # output_limbs_heatmaps[:, :, i * 2]
 
 
     cropping_param = [int(float(cur_hand_bbox[0])),
