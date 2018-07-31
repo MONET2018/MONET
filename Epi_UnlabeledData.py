@@ -68,7 +68,7 @@ vCamera_new = []
 time_instance = []
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path =  line[0]
+    cur_img_path =  "image/"+ line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -176,7 +176,7 @@ gt_content = open('label.txt', 'rb').readlines()
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = line[0]
+    cur_img_path = "image/"+ line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 

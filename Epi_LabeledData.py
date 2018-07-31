@@ -43,7 +43,7 @@ gt_content = open('label.txt', 'rb').readlines()
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = line[0]
+    cur_img_path = "image/"+ line[0]
     cur_img = cv2.imread(cur_img_path)
 
     for iCamera in range(len(vCamera)):
