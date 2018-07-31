@@ -10,8 +10,8 @@ Run cpm_train.py to train convolutional pose machine model for labeled data.
 
 
 ## Epipolar supervision
-Run Epi_LabeledData.py
+Run Epi_LabeledData.py to generate training data for labeled data.
 
-Run Epi_UnlabeledData.py
+Run Epi_UnlabeledData.py to generate training data for unlabeled data and their pairs.
 
-Run Epi_Semisupervised.py
+Run Epi_Semisupervised.py to train the base model with epipolar supervision.
