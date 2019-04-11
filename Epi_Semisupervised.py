@@ -60,6 +60,7 @@ def main():
     heatmap_size = 46
     stages = 6
     num_of_joints = 19
+    num_of_limbs = 1
     nBatch_supervised = 10
     nBatch_unsupervised = 12
     heatmap_extension_length = 20
