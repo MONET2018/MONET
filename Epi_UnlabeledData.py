@@ -15,12 +15,11 @@ from Utility.DataUtility import *
 from Utility.GeometryUtility import *
 from numpy import linalg as LA
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+ 
 
-
-tfr_file = 'js_training_data_unlabeled_pair.tfrecords'
+tfr_file = 'training_data_unlabeled_pair.tfrecords'
 tfr_file_ransac = 'js_training_data_unlabeled_ransac.tfrecords'
-pretrained_model = "/media/yaoxx340/data/yaoxx340/cpm_ep/alg3_iter2.ckpt-595"
+pretrained_model = "alg3_iter2.ckpt-595"
 dataset_dir = ''
 
 SHOW_INFO = False
@@ -73,7 +72,7 @@ vCamera_new = []
 time_instance = []
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path =  '/undis_img/' + line[0]
+    cur_img_path =  'image/' + line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -176,12 +175,12 @@ for iTime in range(len(time_instance)):
 
 SaveValidationData("validation/val_list.txt", vFrame)
 
-gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171026_pose3/alg2.txt', 'rb').readlines()
+gt_content = open('label.txt', 'rb').readlines()
 
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171026_pose3/undis_img/' + line[0]
+    cur_img_path = 'image/' + line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
