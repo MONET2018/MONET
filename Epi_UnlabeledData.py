@@ -47,10 +47,7 @@ img_count = 0
 
 vCamera = LoadCameraData('camera.txt') 
 vCamera = LoadCameraIntrinsicData('intrinsic.txt', vCamera)
-limb_idx = LoadLimbDefinitionData('limb_definition.txt')
-num_of_limbs = len(limb_idx)
-print(num_of_limbs)
-
+ 
 pair_camera = GetPair(vCamera)
 
  
