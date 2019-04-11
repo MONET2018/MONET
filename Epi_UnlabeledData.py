@@ -15,10 +15,12 @@ from Utility.DataUtility import *
 from Utility.GeometryUtility import *
 from numpy import linalg as LA
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-tfr_file = 'training_data_unlabeled_pair.tfrecords'
-tfr_file_ransac = 'training_data_unlabeled_ransac.tfrecords'
-pretrained_model = "/alg2.ckpt-2023"
+
+tfr_file = 'js_training_data_unlabeled_pair.tfrecords'
+tfr_file_ransac = 'js_training_data_unlabeled_ransac.tfrecords'
+pretrained_model = "/media/yaoxx340/data/yaoxx340/cpm_ep/alg3_iter2.ckpt-595"
 dataset_dir = ''
 
 SHOW_INFO = False
@@ -29,8 +31,8 @@ gaussian_radius = 1
 heatmap_extension_length = 20
 limb_threshold = 2
 stages = 6
-confidence_threshold = 0.3
-top_k = 30
+confidence_threshold = 0.4
+
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
@@ -46,10 +48,13 @@ img_count = 0
 
 vCamera = LoadCameraData('camera.txt') 
 vCamera = LoadCameraIntrinsicData('intrinsic.txt', vCamera)
-
+limb_idx = LoadLimbDefinitionData('limb_definition.txt')
+num_of_limbs = len(limb_idx)
+print(num_of_limbs)
 
 pair_camera = GetPair(vCamera)
 
+ 
 
 n = 0
 for i in range(len(pair_camera)):
@@ -68,7 +73,7 @@ vCamera_new = []
 time_instance = []
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path =  "image/"+ line[0]
+    cur_img_path =  '/undis_img/' + line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -171,12 +176,12 @@ for iTime in range(len(time_instance)):
 
 SaveValidationData("validation/val_list.txt", vFrame)
 
-gt_content = open('label.txt', 'rb').readlines()
+gt_content = open('/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171026_pose3/alg2.txt', 'rb').readlines()
 
 
 for idx, line in enumerate(gt_content):
     line = line.split()
-    cur_img_path = "image/"+ line[0]
+    cur_img_path = '/media/yaoxx340/data/yaoxx340/panoptic-toolbox/scripts/171026_pose3/undis_img/' + line[0]
     cur_img = cv2.imread(cur_img_path)
     im_full = cur_img
 
@@ -336,7 +341,7 @@ for iTime in range(len(time_instance)):
         set = []
         for iP in range(len(vP)): 
             # if joint[iJoint][iP,2] > 0.3:
-            if confident_joint[iJoint,iP] > 0.3:
+            if confident_joint[iJoint,iP] > 0.4:
                 set.append(iP)
 
         if len(set) < 2:
@@ -357,7 +362,7 @@ for iTime in range(len(time_instance)):
             joint_temp[iP, :] = joint[iJoint][set[iP],:]
 
 
-        X,n = RANSAC_Triangulation(vP_temp, joint_temp,50)
+        X,n = RANSAC_Triangulation(vP_temp, joint_temp,200)
         Joint3D.append(X)
 
     # for iP in range(len(vP)):
@@ -467,28 +472,10 @@ for iPair in range(len(pair_ref)):
     output_b = es.b01.flatten().tolist()
     output_confident_joint = es.camera_ref.confident_joint.flatten().tolist()
 
-
-    # ht = np.concatenate(
-    #     (es.camera_ref.heatmap1, output_background_map.reshape((heatmap_size, heatmap_size, 1))),
-    #     axis=2)
+ 
 
     output_heatmap = es.camera_ref.heatmap1.flatten().tolist()
-
-    # raw_sample = tf.train.Example(features=tf.train.Features(
-    #     feature={'image_ref': _bytes_feature(output_image_ref),
-    #              'image_src1': _bytes_feature(output_image_src1),
-    #              'image_src2': _bytes_feature(output_image_src2),
-    #              # 'heatmaps': _float32_feature(output_heatmap),
-    #              'H1': _float32_feature(output_H1),
-    #              'H01': _float32_feature(output_H01),
-    #              'H2': _float32_feature(output_H2),
-    #              'H02': _float32_feature(output_H02),
-    #              'a1': _float32_feature(output_a1),
-    #              'b1': _float32_feature(output_b1),
-    #              'a2': _float32_feature(output_a2),
-    #              'b2': _float32_feature(output_b2),
-    #              'frame': _float32_feature([et.camera_ref.time, et.camera_ref.frame])}))
-    #
+ 
     raw_sample = tf.train.Example(features=tf.train.Features(
         feature={'image_ref': _bytes_feature(output_image_ref),
                  'image_src': _bytes_feature(output_image_src),
