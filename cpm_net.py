@@ -332,8 +332,8 @@ class CPM_Model(object):
                 sess.run(tf.assign(conv_bias, loaded_bias))
 
             # conv5_3_CPM
-            conv_kernel = tf.get_variable('sub_stages/sub_stage_img_feature/kernel')
-            conv_bias = tf.get_variable('sub_stages/sub_stage_img_feature/bias')
+            conv_kernel = tf.get_variable('sub_stages/conv5_3_CPM/kernel')
+            conv_bias = tf.get_variable('sub_stages/conv5_3_CPM/bias')
 
             loaded_kernel = weights['conv5_3_CPM']['weights']
             loaded_bias = weights['conv5_3_CPM']['biases']
@@ -342,8 +342,8 @@ class CPM_Model(object):
             sess.run(tf.assign(conv_bias, loaded_bias))
 
             ## stage 1
-            conv_kernel = tf.get_variable('stage_1/conv1/kernel')
-            conv_bias = tf.get_variable('stage_1/conv1/bias')
+            conv_kernel = tf.get_variable('stage_1/conv6_1_CPM/kernel')
+            conv_bias = tf.get_variable('stage_1/conv6_1_CPM/bias')
 
             loaded_kernel = weights['conv6_1_CPM']['weights']
             loaded_bias = weights['conv6_1_CPM']['biases']
@@ -351,24 +351,5 @@ class CPM_Model(object):
             sess.run(tf.assign(conv_kernel, loaded_kernel))
             sess.run(tf.assign(conv_bias, loaded_bias))
 
-            if finetune != True:
-                conv_kernel = tf.get_variable('stage_1/stage_heatmap/kernel')
-                conv_bias = tf.get_variable('stage_1/stage_heatmap/bias')
-
-                loaded_kernel = weights['conv6_2_CPM']['weights']
-                loaded_bias = weights['conv6_2_CPM']['biases']
-
-                sess.run(tf.assign(conv_kernel, loaded_kernel))
-                sess.run(tf.assign(conv_bias, loaded_bias))
-
-                ## stage 2 and behind
-                for stage in range(2, self.stages + 1):
-                    for layer in range(1, 8):
-                        conv_kernel = tf.get_variable('stage_' + str(stage) + '/mid_conv' + str(layer) + '/kernel')
-                        conv_bias = tf.get_variable('stage_' + str(stage) + '/mid_conv' + str(layer) + '/bias')
-
-                        loaded_kernel = weights['Mconv' + str(layer) + '_stage' + str(stage)]['weights']
-                        loaded_bias = weights['Mconv' + str(layer) + '_stage' + str(stage)]['biases']
-
-                        sess.run(tf.assign(conv_kernel, loaded_kernel))
-                        sess.run(tf.assign(conv_bias, loaded_bias))
+ 
+ 
