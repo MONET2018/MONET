@@ -271,7 +271,7 @@ class CPM_Model(object):
                                                             optimizer='Adam')
         self.merged_summary = tf.summary.merge_all()
 
-    def load_weights_from_file(self, weight_file_path, sess, finetune=True):
+    def load_weights_from_file(self, weight_file_path, sess, OP_joint=True):
         weights = np.load(weight_file_path).item()
 
         with tf.variable_scope('', reuse=True):
@@ -350,6 +350,26 @@ class CPM_Model(object):
 
             sess.run(tf.assign(conv_kernel, loaded_kernel))
             sess.run(tf.assign(conv_bias, loaded_bias))
+
+ 
+            if OP_joint == True:
+                conv_kernel = tf.get_variable('stage_1/conv6_2_CPM/kernel')
+                conv_bias = tf.get_variable('stage_1/conv6_2_CPM/bias')
+
+                loaded_kernel = weights['conv6_2_CPM']['weights']
+                loaded_bias = weights['conv6_2_CPM']['biases']
+
+                sess.run(tf.assign(conv_kernel, loaded_kernel))
+                sess.run(tf.assign(conv_bias, loaded_bias))
+
+                ## stage 2 and behind
+                for stage in range(2, self.stages + 1):
+                    for layer in range(1, 8):
+                        conv_kernel = tf.get_variable('stage_' + str(stage)+'/Mconv' + str(layer) + '_stage' + str(stage) + '/kernel')
+                        conv_bias = tf.get_variable('stage_' + str(stage)+'/Mconv' + str(layer) + '_stage' + str(stage) + '/bias')
+
+                        loaded_kernel = weights['Mconv' + str(layer) + '_stage' + str(stage)]['weights']
+                        loaded_bias = weights['Mconv' + str(layer) + '_stage' + str(stage)]['biases'] 
 
  
  
