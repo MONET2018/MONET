@@ -7,6 +7,7 @@ from cpm_net import *
 
 tfr_data_files = ['alg2.tfrecords']
 pre_trained_weights = 'openpose_weights.npy'
+OPENPOSE_joint = False
 input_size = 368
 heatmap_size = 46
 stages =6 
@@ -58,7 +59,7 @@ with tf.Session() as sess:
     sess.run(init)
     saver.restore(sess,"alg3_iter1.ckpt-1625")
 
-    model.load_weights_from_file(pre_trained_weights, sess, finetune=True)
+    model.load_weights_from_file(pre_trained_weights, sess, OP_joint=OPENPOSE_joint)
  
     for i in range(0, training_iterations + 1):
         # Read in batch data
