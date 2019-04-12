@@ -6,6 +6,7 @@ from cpm_net import *
 
 
 tfr_data_files = ['alg2.tfrecords']
+pre_trained_weights = 'openpose_weights.npy'
 input_size = 368
 heatmap_size = 46
 stages =6 
@@ -57,14 +58,8 @@ with tf.Session() as sess:
     sess.run(init)
     saver.restore(sess,"alg3_iter1.ckpt-1625")
 
-    '''
-    model.load_weights_from_file(pretrained_model, sess, finetune=True)
-
-    for variable in tf.trainable_variables():
-        with tf.variable_scope('', reuse=True):
-                var = tf.get_variable(variable.name.split(':0')[0])
-                print(variable.name, np.mean(sess.run(var)))           
-    '''
+    model.load_weights_from_file(pre_trained_weights, sess, finetune=True)
+ 
     for i in range(0, training_iterations + 1):
         # Read in batch data
         batch_x_np, batch_y_np = sess.run([batch_x,batch_y])
