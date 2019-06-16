@@ -5,6 +5,23 @@ from GeometryUtility import *
 from Epi_class import *
 
 
+def kl_divergence(q_logits, p_logits):
+    q = tf.nn.softmax(q_logits)
+    kl = tf.reduce_sum(tf.reduce_sum(q * (tf.nn.log_softmax(q_logits) - tf.nn.log_softmax(p_logits)), -1))
+    return kl
+
+
+def CrossLossTest(input1, input2, loss_type):
+    if loss_type == 'L2':
+        return tf.nn.l2_loss((input1 - input2))
+    elif loss_type == 'KL':
+        return kl_divergence(input1, input2) * 10.0
+    elif loss_type == 'KL_swapped':
+        return kl_divergence(input2, input1) * 10.0
+    elif loss_type == 'JS':
+        return (kl_divergence(input1, input2) + kl_divergence(input2, input1)) * 10.0
+
+
 class EpiNet_pair(object):
     def __init__(self, stages, joints, lr, lr_decay_rate, lr_decay_step, input_size, label_size, ext):
         self.stages = stages
@@ -79,27 +96,6 @@ class EpiNet_pair(object):
         unlabeled_weight = 3
         confidence_weight = 1
         self.out_src = out_src
-        # for stage in range(self.stages):
-        #
-        #
-        #     heatmap = tf.nn.l2_normalize(self.model_ref.stage_heatmap[stage][:, :, :, :-1], [1, 2])
-        #     unimodality = tf.reduce_max(heatmap, axis=[1, 2])  # -tf.reduce_min(heatmap, axis=[1, 2])
-        #     unimodality = tf.nn.sigmoid(10 * (unimodality - 0.5))
-        #     self.joint_modality = unimodality
-        #
-        #     self.unimodality[stage] = -modality_weight*tf.nn.l2_loss(unimodality) / self.batch_size_unlabeled
-        #
-        #     heatmap = tf.nn.l2_normalize(self.model_src.stage_heatmap[stage][:, :, :, :-1], [1, 2])
-        #     unimodality = tf.reduce_max(heatmap, axis=[1, 2])  # -tf.reduce_min(heatmap, axis=[1, 2])
-        #     unimodality = tf.nn.sigmoid(10 * (unimodality - 0.5))
-        #
-        #     unimodality_last = unimodality
-        #
-        #     self.unimodality[stage] += -modality_weight*tf.nn.l2_loss(unimodality) / self.batch_size_unlabeled
-            # self.stage_loss[stage] = self.l2_loss[stage] + self.unimodality[stage]
-
-        # unimodality_last = tf.expand_dims(unimodality_last, axis=1)
-        # unimodality_last = tf.tile(unimodality_last, tf.stack([1, tf.shape(out_src)[1], 1]))+0.1
 
         for stage in range(self.stages):
             out_ref = EpipolarTransferHeatmap_siamese_ref(self.model_ref.stage_heatmap[stage][:, :, :, :-1],
@@ -108,24 +104,25 @@ class EpiNet_pair(object):
 
             # out_ref = tf.nn.l2_normalize(out_ref, [1])
             self.out_ref = out_ref
-            self.l2_loss[stage] = unlabeled_weight * tf.nn.l2_loss((out_ref - self.out_src)) / self.batch_size_unlabeled
+
+
+            ###############################################################################################################
+            ## Loss Type Selection for Cross Loss                           ###############################################
+            ## L2: L2 Loss                                                  ###############################################
+            ## KL: Kullback–Leibler divergence                              ###############################################
+            ## KL_swapped: Kullback–Leibler divergence with swapped inputs  ###############################################
+            ## JS: Jensen–Shannon divergence                                ###############################################
+            self.l2_loss[stage] = unlabeled_weight * CrossLossTest(out_ref, self.out_src, 'L2') / self.batch_size_unlabeled
+            ###############################################################################################################
 
             unimodality = tf.reduce_max(out_ref, axis=[1])  # -tf.reduce_min(heatmap, axis=[1, 2])
-            # unimodality = tf.nn.sigmoid(10 * (unimodality - 0.5))
+
+
             self.joint_modality = unimodality
 
             self.unimodality[stage] = -modality_weight * tf.nn.l2_loss(unimodality) / self.batch_size_unlabeled
 
-        # confident_joint = tf.reshape(self.confidence, (self.batch_size_unlabeled, 1, 1, self.nJoints))
-        # confident_joint = tf.tile(confident_joint, (1, self.label_size, self.label_size, 1))
 
-        # for stage in range(self.stages):
-        # self.l2_loss_unlabeled = confidence_weight*tf.nn.l2_loss(
-        #     confident_joint * (
-        #     self.model_ref.stage_heatmap[self.stages-1][:, :, :, :-1] - self.heatmap_unlabeled[:, :, :, :-1])) / self.batch_size_unlabeled
-
-        # self.l2_loss_unlabeled = confidence_weight * tf.nn.l2_loss(
-            # (self.model_ref.stage_heatmap[self.stages - 1][:, :, :, :-1] - self.heatmap_unlabeled[:, :, :,:-1])) / self.batch_size_unlabeled
 
             self.l2_loss_unlabeled[stage] = confidence_weight * tf.nn.l2_loss(
                 (self.model_ref.stage_heatmap[stage] - self.heatmap_unlabeled)) / self.batch_size_unlabeled
