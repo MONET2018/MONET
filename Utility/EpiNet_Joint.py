@@ -109,10 +109,10 @@ class EpiNet_pair(object):
             ###############################################################################################################
             ## Loss Type Selection for Cross Loss                           ###############################################
             ## L2: L2 Loss                                                  ###############################################
-            ## KL: Kullback–Leibler divergence                              ###############################################
-            ## KL_swapped: Kullback–Leibler divergence with swapped inputs  ###############################################
-            ## JS: Jensen–Shannon divergence                                ###############################################
-            self.l2_loss[stage] = unlabeled_weight * CrossLossTest(out_ref, self.out_src, 'L2') / self.batch_size_unlabeled
+            ## KL: Kullback Leibler divergence                              ###############################################
+            ## KL_swapped: Kullback Leibler divergence with swapped inputs  ###############################################
+            ## JS: Jensen Shannon divergence                                ###############################################
+            self.l2_loss[stage] = unlabeled_weight * CrossLossTest(out_ref, self.out_src, 'JS') / self.batch_size_unlabeled
             ###############################################################################################################
 
             unimodality = tf.reduce_max(out_ref, axis=[1])  # -tf.reduce_min(heatmap, axis=[1, 2])
