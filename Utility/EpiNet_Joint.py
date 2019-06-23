@@ -6,6 +6,8 @@ from Epi_class import *
 
 
 def kl_divergence(q_logits, p_logits):
+    q_logits = tf.reduce_sum(q_logits, -1)
+    p_logits = tf.reduce_sum(p_logits, -1)
     q = tf.nn.softmax(q_logits)
     kl = tf.reduce_sum(tf.reduce_sum(q * (tf.nn.log_softmax(q_logits) - tf.nn.log_softmax(p_logits)), -1))
     return kl
